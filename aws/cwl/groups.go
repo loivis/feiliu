@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
-	"github.com/loivis/godis/utils"
 	"github.com/loivis/feiliu/aws/sess"
+	"github.com/loivis/feiliu/utils"
 )
 
 // LogGroups ...

@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/loivis/godis/utils"
+	"github.com/loivis/feiliu/utils"
 )
 
 func init() {

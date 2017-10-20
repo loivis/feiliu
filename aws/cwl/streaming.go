@@ -2,48 +2,43 @@ package cwl
 
 import (
 	"log"
-	"time"
+	"sort"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
 	"github.com/loivis/feiliu/aws/sess"
 )
 
+// FullEvent ...
+type FullEvent struct {
+	LogGroupName string
+	*cloudwatchlogs.FilteredLogEvent
+}
+
 // Streaming ...
 func Streaming(groupName string) {
-	log.Println(groupName)
-	var logStreams []*cloudwatchlogs.LogStream
+	var events []FullEvent
 	client := cloudwatchlogs.New(sess.Sess())
-	dlsInput := &cloudwatchlogs.DescribeLogStreamsInput{
-		LogGroupName: &groupName,
-		OrderBy:      aws.String("LastEventTime"),
-		Descending:   aws.Bool(true)}
-	dlsFn := func(output *cloudwatchlogs.DescribeLogStreamsOutput, hasMore bool) bool {
-		for _, stream := range output.LogStreams {
-			lastEventTime := time.Unix(*stream.LastEventTimestamp/1e3, 0)
-			if lastEventTime.Add(time.Hour * time.Duration(2)).Before(time.Now()) {
-				break
-			}
-			logStreams = append(logStreams, stream)
+	input := &cloudwatchlogs.FilterLogEventsInput{LogGroupName: aws.String(groupName),
+		StartTime: aws.Int64(1508540633886),
+		EndTime:   aws.Int64(1508540635888)}
+	client.FilterLogEventsPages(input, func(output *cloudwatchlogs.FilterLogEventsOutput, hasMore bool) bool {
+		log.Println(len(events))
+		log.Println(len(output.Events))
+		for _, e := range output.Events {
+			var f FullEvent
+			f.LogGroupName = groupName
+			f.FilteredLogEvent = e
+			events = append(events, f)
 		}
-		for output.NextToken != nil {
+		if output.NextToken != nil {
 			return true
 		}
 		return false
+	})
+	log.Println("number of events:", len(events))
+	sort.Slice(events, func(i, j int) bool { return *events[i].Timestamp < *events[j].Timestamp })
+	for _, e := range events[:] {
+		log.Println(*e.LogStreamName, *e.Timestamp, *e.Message)
 	}
-	client.DescribeLogStreamsPages(dlsInput, dlsFn)
-	// log.Println(logStreams)
-	for _, stream := range logStreams {
-		log.Println(*stream.LogStreamName)
-	}
-	var logEvents []*cloudwatchlogs.OutputLogEvent
-	gleInput := &cloudwatchlogs.GetLogEventsInput{
-		LogGroupName:  &groupName,
-		LogStreamName: logStreams[0].LogStreamName}
-	gleFn := func(output *cloudwatchlogs.GetLogEventsOutput, hasMore bool) bool {
-		logEvents = append(logEvents, output.Events...)
-		return false
-	}
-	client.GetLogEventsPages(gleInput, gleFn)
-	log.Println(logEvents)
 }
