@@ -1,12 +1,10 @@
 package utils
 
-import (
-	"log"
-)
+import "fmt"
 
 // CheckError ...
 func CheckError(err error) {
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 	}
 }
