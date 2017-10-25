@@ -19,6 +19,11 @@ func validateGroup(group string) {
 		fmt.Println("log group doesn't exist:", group)
 		listGroups("")
 	} else if count > 1 {
+		for i := range output.LogGroups {
+			if *output.LogGroups[i].LogGroupName == group {
+				return
+			}
+		}
 		fmt.Println("more groups found for prefix:", group)
 		listGroups(group)
 	}
