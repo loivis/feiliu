@@ -17,12 +17,56 @@ Usage of feiliu:
     	name or prefix of log group
 ```
 
-# Examples
+# Help
 
-`feiliu -g group-name`
+## feiliu --help
 
-+ If `group-name` has an exact match, log events will be streamed from last minute
+```
+cli tool to stream aws cloudwatch logs
 
-+ If `group-name` matches no log group, all available log groups will be listed
+Flags:
+      --help                    Show context-sensitive help (also try --help-long and --help-man).
+  -p, --prefix=prod-nginx       prefix of log groups
+  -g, --api-gateway=k2i0n1a5se  id of api gateway
+  -s, --stage=prod              name of api gateway stage
+  -l, --lambda=function-name    name of lambda function
 
-+ If `group-name` matched multiple groups, all groups with prefix `group-name` will be listed
+Commands:
+  help [<command>...]
+    Show help.
+
+  list [<flags>]
+    list cloudwatch log groups
+
+  stream --name=NAME [<flags>]
+    stream cloudwatch logs
+```
+
+## feiliu list --help
+
+```
+list cloudwatch log groups
+
+Flags:
+      --help                    Show context-sensitive help (also try --help-long and --help-man).
+  -p, --prefix=prod-nginx       prefix of log groups
+  -g, --api-gateway=k2i0n1a5se  id of api gateway
+  -s, --stage=prod              name of api gateway stage
+  -l, --lambda=function-name    name of lambda function
+  -m, --match=something         substring to match name of log groups
+```
+
+## feiliu stream --help
+
+```
+stream cloudwatch logs
+
+Flags:
+      --help                    Show context-sensitive help (also try --help-long and --help-man).
+  -p, --prefix=prod-nginx       prefix of log groups
+  -g, --api-gateway=k2i0n1a5se  id of api gateway
+  -s, --stage=prod              name of api gateway stage
+  -l, --lambda=function-name    name of lambda function
+  -n, --name=NAME               name of the log group
+  -t, --start=10m               when to start streaming, default 1 minute
+```
