@@ -2,9 +2,7 @@ package awslogs
 
 import (
 	"fmt"
-	"os"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -15,28 +13,6 @@ import (
 type FullEvent struct {
 	LogGroupName *string
 	*cloudwatchlogs.FilteredLogEvent
-}
-
-func validateGroup(group *string) {
-	client := client()
-	input := &cloudwatchlogs.DescribeLogGroupsInput{LogGroupNamePrefix: group}
-	output, err := client.DescribeLogGroups(input)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if count := len(output.LogGroups); count == 0 {
-		fmt.Println("log group doesn't exist:", *group)
-		listGroups(aws.String(""))
-	} else if count > 1 {
-		for i := range output.LogGroups {
-			if *output.LogGroups[i].LogGroupName == *group {
-				return
-			}
-		}
-		prefixGroups(group)
-		fmt.Println(strings.Repeat("#", 10), "exiting...", strings.Repeat("#", 10))
-		os.Exit(0)
-	}
 }
 
 func streaming(group *string, start *time.Duration) {
@@ -62,7 +38,6 @@ func fetchEvents(group *string, start *time.Duration, c chan<- *FullEvent) {
 		EndTime:      aws.Int64(endTime)}
 	for {
 		var events []FullEvent
-		// fmt.Println(startTime, endTime)
 		input.StartTime = aws.Int64(startTime)
 		input.EndTime = aws.Int64(endTime)
 		client.FilterLogEventsPages(input, func(output *cloudwatchlogs.FilterLogEventsOutput, hasMore bool) bool {
@@ -77,7 +52,6 @@ func fetchEvents(group *string, start *time.Duration, c chan<- *FullEvent) {
 			}
 			return false
 		})
-		// fmt.Println("number of events:", len(events))
 		if count := len(events); count > 0 {
 			sort.Slice(events, func(i, j int) bool { return *events[i].Timestamp < *events[j].Timestamp })
 			sleepTime := 1 * 1e3 / count
