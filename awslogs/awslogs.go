@@ -42,9 +42,17 @@ func Start(match, prefix, apiGateway, stage, lambda *string, start *time.Duratio
 		fmt.Println(strings.Repeat("#", 10), *result[0].LogGroupName, strings.Repeat("#", 10))
 		streaming(result[0].LogGroupName, start)
 	default:
+		exactMatch := false
 		fmt.Println(strings.Repeat("#", 10), len(result), "groups", strings.Repeat("#", 10))
 		for _, group := range result {
 			fmt.Println(*group.LogGroupName)
+			if *prefix == *group.LogGroupName {
+				exactMatch = true
+			}
+		}
+		if exactMatch {
+			fmt.Println(strings.Repeat("#", 10), *prefix, strings.Repeat("#", 10))
+			streaming(prefix, start)
 		}
 	}
 }
